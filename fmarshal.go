@@ -31,13 +31,32 @@ func MarshalFlag(st interface{}) []string {
 	return args
 }
 
-func marshalVal(shortOption bool, name string, val reflect.Value) []string {
-	k := val.Kind()
+func marshalVal(shortOption bool, name string, v reflect.Value) []string {
+	// return nil on nil pointer struct fields
+	if !v.IsValid() || !v.CanInterface() {
+		return []string{}
+	}
+
+	k := v.Kind()
+
+	if k == reflect.Ptr {
+		v = v.Elem()
+
+		// return nil on nil pointer struct fields
+		if !v.IsValid() || !v.CanInterface() {
+			return []string{}
+		}
+
+		k = v.Kind()
+	}
+
+	val := v.Interface()
+
 	if k == reflect.Slice {
-		l := val.Len()
+		l := v.Len()
 		args := make([]string, 0)
 		for i := 0; i < l; i++ {
-			cval := val.Index(i)
+			cval := v.Index(i)
 			args = append(args, marshalVal(shortOption, name, cval)...)
 		}
 		return args

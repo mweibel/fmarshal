@@ -28,6 +28,27 @@ func Test_FlagMarshal(t *testing.T) {
 	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo))
 }
 
+func Test_FlagMarshalPtr(t *testing.T) {
+	debug := true
+	level := "info"
+	numeric := 42
+	sliceTest := []string{"foo", "bar", "baz"}
+	foo := struct {
+		Debug     *bool     `flag:"--debug"`
+		Level     *string   `flag:"--level"`
+		Numeric   *int      `flag:"-n"`
+		SliceTest *[]string `flag:"--test"`
+		Nil       *string   `flag:"--nil"`
+	}{
+		Debug:     &debug,
+		Level:     &level,
+		Numeric:   &numeric,
+		SliceTest: &sliceTest,
+	}
+
+	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo))
+}
+
 type Args struct {
 	Debug     bool     `flag:"--debug"`
 	Level     string   `flag:"--level"`
