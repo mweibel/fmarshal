@@ -1,5 +1,5 @@
 # fmarshal
-[![GoDoc](https://godoc.org/github.com/mweibel/fmarshal?status.svg)](https://godoc.org/github.com/mweibel/fmarshal) ![build](https://github.com/github/docs/actions/workflows/go.yml/badge.svg)
+[![GoDoc](https://godoc.org/github.com/mweibel/fmarshal?status.svg)](https://godoc.org/github.com/mweibel/fmarshal) ![build](https://github.com/mweibel/fmarshal/actions/workflows/go.yml/badge.svg)
 
 ```
 go get github.com/mweibel/fmarshal
