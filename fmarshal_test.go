@@ -25,7 +25,8 @@ func Test_FlagMarshal(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo))
+	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo, true))
+	assert.Equal(t, []string{"--debug=true", "--level=info", "-n 42", "--test=foo", "--test=bar", "--test=baz"}, MarshalFlag(foo, false))
 }
 
 func Test_FlagMarshalPtr(t *testing.T) {
@@ -46,7 +47,7 @@ func Test_FlagMarshalPtr(t *testing.T) {
 		SliceTest: &sliceTest,
 	}
 
-	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo))
+	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo, true))
 }
 
 type Args struct {
@@ -67,6 +68,6 @@ func ExampleMarshal() {
 			"baz",
 		},
 	}
-	fmt.Println(strings.Join(MarshalFlag(a), " "))
+	fmt.Println(strings.Join(MarshalFlag(a, true), " "))
 	// Output: --debug='true' --level='info' -n '42' --test='foo' --test='bar' --test='baz'
 }

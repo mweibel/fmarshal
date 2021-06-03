@@ -7,7 +7,7 @@ import (
 )
 
 // MarshalFlag marshals a struct into a slice of flags.
-func MarshalFlag(st interface{}) []string {
+func MarshalFlag(st interface{}, quote bool) []string {
 	t := reflect.TypeOf(st)
 	v := reflect.ValueOf(st)
 
@@ -26,12 +26,12 @@ func MarshalFlag(st interface{}) []string {
 
 		shortOption := strings.Count(name, "-") == 1
 
-		args = append(args, marshalVal(shortOption, name, val)...)
+		args = append(args, marshalVal(shortOption, quote, name, val)...)
 	}
 	return args
 }
 
-func marshalVal(shortOption bool, name string, v reflect.Value) []string {
+func marshalVal(shortOption, quote bool, name string, v reflect.Value) []string {
 	// return nil on nil pointer struct fields
 	if !v.IsValid() || !v.CanInterface() {
 		return []string{}
@@ -57,12 +57,15 @@ func marshalVal(shortOption bool, name string, v reflect.Value) []string {
 		args := make([]string, 0)
 		for i := 0; i < l; i++ {
 			cval := v.Index(i)
-			args = append(args, marshalVal(shortOption, name, cval)...)
+			args = append(args, marshalVal(shortOption, quote, name, cval)...)
 		}
 		return args
 	}
 
-	strVal := "'" + strings.ReplaceAll(fmt.Sprintf("%v", val), "'", "'\"'\"'") + "'"
+	strVal := fmt.Sprintf("%v", val)
+	if quote {
+		strVal = "'" + strings.ReplaceAll(fmt.Sprintf("%v", val), "'", "'\"'\"'") + "'"
+	}
 
 	if shortOption {
 		return []string{fmt.Sprintf("%s %s", name, strVal)}

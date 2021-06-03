@@ -7,7 +7,7 @@ go get github.com/mweibel/fmarshal
 
 Package fmarshal marshals a struct type into a slice of CLI arguments.
 
-**Note:** This package does not do any shell escaping. It just quotes flag values.
+**Note:** This package does not do any shell escaping. It just quotes flag values if quote is true.
 
 Example:
 
@@ -23,6 +23,6 @@ a := Args{
   Level: "info",
   Numeric: 42
 }
-fmt.Println(strings.Join(MarshalFlag(a), " "))
+fmt.Println(strings.Join(MarshalFlag(a, true), " "))
 // Output: --debug=true --level=info -n 42
 ```
