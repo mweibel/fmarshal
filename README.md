@@ -7,6 +7,8 @@ go get github.com/mweibel/fmarshal
 
 Package fmarshal marshals a struct type into a slice of CLI arguments.
 
+**Note:** This package does not do any shell escaping. It just quotes flag values.
+
 Example:
 
 ```golang
