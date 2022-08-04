@@ -50,6 +50,16 @@ func Test_FlagMarshalPtr(t *testing.T) {
 	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo, true))
 }
 
+func Test_FlagMarshalOmitIfNotSet(t *testing.T) {
+	foo := struct {
+		Debug   bool   `flag:"--debug,omitempty"`
+		Level   string `flag:"--level,omitempty"`
+		Numeric int    `flag:"-n,omitempty"`
+	}{}
+
+	assert.Equal(t, []string{}, MarshalFlag(foo, true))
+}
+
 type Args struct {
 	Debug     bool     `flag:"--debug"`
 	Level     string   `flag:"--level"`
@@ -57,7 +67,7 @@ type Args struct {
 	SliceTest []string `flag:"--test"`
 }
 
-func ExampleMarshal() {
+func ExampleMarshalFlag() {
 	a := Args{
 		Debug:   true,
 		Level:   "info",

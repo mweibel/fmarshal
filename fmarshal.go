@@ -22,16 +22,21 @@ func MarshalFlag(st interface{}, quote bool) []string {
 			continue
 		}
 
-		name := field.Tag.Get("flag")
+		tag := strings.Split(field.Tag.Get("flag"), ",")
+		name := tag[0]
+		omitempty := false
+		if len(tag) == 2 && tag[1] == "omitempty" {
+			omitempty = true
+		}
 
 		shortOption := strings.Count(name, "-") == 1
 
-		args = append(args, marshalVal(shortOption, quote, name, val)...)
+		args = append(args, marshalVal(shortOption, quote, name, val, omitempty)...)
 	}
 	return args
 }
 
-func marshalVal(shortOption, quote bool, name string, v reflect.Value) []string {
+func marshalVal(shortOption, quote bool, name string, v reflect.Value, omitempty bool) []string {
 	// return nil on nil pointer struct fields
 	if !v.IsValid() || !v.CanInterface() {
 		return []string{}
@@ -50,6 +55,10 @@ func marshalVal(shortOption, quote bool, name string, v reflect.Value) []string 
 		k = v.Kind()
 	}
 
+	if v.IsZero() && omitempty {
+		return []string{}
+	}
+
 	val := v.Interface()
 
 	if k == reflect.Slice {
@@ -57,12 +66,15 @@ func marshalVal(shortOption, quote bool, name string, v reflect.Value) []string 
 		args := make([]string, 0)
 		for i := 0; i < l; i++ {
 			cval := v.Index(i)
-			args = append(args, marshalVal(shortOption, quote, name, cval)...)
+			args = append(args, marshalVal(shortOption, quote, name, cval, omitempty)...)
 		}
 		return args
 	}
 
 	strVal := fmt.Sprintf("%v", val)
+	if strVal == "" && omitempty {
+		return []string{}
+	}
 	if quote {
 		strVal = "'" + strings.ReplaceAll(fmt.Sprintf("%v", val), "'", "'\"'\"'") + "'"
 	}

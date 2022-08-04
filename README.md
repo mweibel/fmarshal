@@ -16,6 +16,7 @@ type Args struct {
   Debug   bool   `flag:"--debug"`
   Level   string `flag:"--level"`
   Numeric int    `flag:"-n"`
+  Omit    string `flag:"-omit,omitempty"`
 }
 
 a := Args{
