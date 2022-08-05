@@ -25,8 +25,29 @@ func Test_FlagMarshal(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo, true))
-	assert.Equal(t, []string{"--debug=true", "--level=info", "-n 42", "--test=foo", "--test=bar", "--test=baz"}, MarshalFlag(foo, false))
+	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo, true, false))
+	assert.Equal(t, []string{"--debug=true", "--level=info", "-n 42", "--test=foo", "--test=bar", "--test=baz"}, MarshalFlag(foo, false, false))
+}
+
+func Test_FlagMarshal_SeparateKeyVal(t *testing.T) {
+	foo := struct {
+		Debug     bool     `flag:"--debug"`
+		Level     string   `flag:"--level"`
+		Numeric   int      `flag:"-n"`
+		SliceTest []string `flag:"--test"`
+	}{
+		Debug:   true,
+		Level:   "info",
+		Numeric: 42,
+		SliceTest: []string{
+			"foo",
+			"bar",
+			"baz",
+		},
+	}
+
+	assert.Equal(t, []string{"--debug", "'true'", "--level", "'info'", "-n", "'42'", "--test", "'foo'", "--test", "'bar'", "--test", "'baz'"}, MarshalFlag(foo, true, true))
+	assert.Equal(t, []string{"--debug", "true", "--level", "info", "-n", "42", "--test", "foo", "--test", "bar", "--test", "baz"}, MarshalFlag(foo, false, true))
 }
 
 func Test_FlagMarshalPtr(t *testing.T) {
@@ -47,7 +68,7 @@ func Test_FlagMarshalPtr(t *testing.T) {
 		SliceTest: &sliceTest,
 	}
 
-	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo, true))
+	assert.Equal(t, []string{"--debug='true'", "--level='info'", "-n '42'", "--test='foo'", "--test='bar'", "--test='baz'"}, MarshalFlag(foo, true, false))
 }
 
 func Test_FlagMarshalOmitIfNotSet(t *testing.T) {
@@ -57,7 +78,7 @@ func Test_FlagMarshalOmitIfNotSet(t *testing.T) {
 		Numeric int    `flag:"-n,omitempty"`
 	}{}
 
-	assert.Equal(t, []string{}, MarshalFlag(foo, true))
+	assert.Equal(t, []string{}, MarshalFlag(foo, true, false))
 }
 
 type Args struct {
@@ -78,6 +99,6 @@ func ExampleMarshalFlag() {
 			"baz",
 		},
 	}
-	fmt.Println(strings.Join(MarshalFlag(a, true), " "))
+	fmt.Println(strings.Join(MarshalFlag(a, true, false), " "))
 	// Output: --debug='true' --level='info' -n '42' --test='foo' --test='bar' --test='baz'
 }

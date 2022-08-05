@@ -7,7 +7,10 @@ import (
 )
 
 // MarshalFlag marshals a struct into a slice of flags.
-func MarshalFlag(st interface{}, quote bool) []string {
+//
+// - quote will quote each value
+// - separateKeyVal will make sure key and value are separate items in the returned slice.
+func MarshalFlag(st interface{}, quote, separateKeyVal bool) []string {
 	t := reflect.TypeOf(st)
 	v := reflect.ValueOf(st)
 
@@ -31,12 +34,12 @@ func MarshalFlag(st interface{}, quote bool) []string {
 
 		shortOption := strings.Count(name, "-") == 1
 
-		args = append(args, marshalVal(shortOption, quote, name, val, omitempty)...)
+		args = append(args, marshalVal(shortOption, quote, separateKeyVal, name, val, omitempty)...)
 	}
 	return args
 }
 
-func marshalVal(shortOption, quote bool, name string, v reflect.Value, omitempty bool) []string {
+func marshalVal(shortOption, quote, separateKeyVal bool, name string, v reflect.Value, omitempty bool) []string {
 	// return nil on nil pointer struct fields
 	if !v.IsValid() || !v.CanInterface() {
 		return []string{}
@@ -66,7 +69,7 @@ func marshalVal(shortOption, quote bool, name string, v reflect.Value, omitempty
 		args := make([]string, 0)
 		for i := 0; i < l; i++ {
 			cval := v.Index(i)
-			args = append(args, marshalVal(shortOption, quote, name, cval, omitempty)...)
+			args = append(args, marshalVal(shortOption, quote, separateKeyVal, name, cval, omitempty)...)
 		}
 		return args
 	}
@@ -79,6 +82,9 @@ func marshalVal(shortOption, quote bool, name string, v reflect.Value, omitempty
 		strVal = "'" + strings.ReplaceAll(fmt.Sprintf("%v", val), "'", "'\"'\"'") + "'"
 	}
 
+	if separateKeyVal {
+		return []string{name, strVal}
+	}
 	if shortOption {
 		return []string{fmt.Sprintf("%s %s", name, strVal)}
 	}
